@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 class Visualizer(object):

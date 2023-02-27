@@ -1,7 +1,7 @@
+import logging
 from src.maze import Maze
 from src.maze_viz import Visualizer
-from src.solver import DepthFirstBacktracker
-from src.solver import BiDirectional
+from src.solver import MDP, AStar, DepthFirst, PolicyIteration
 from src.solver import BreadthFirst
 
 
@@ -18,7 +18,7 @@ class MazeManager(object):
     def __init__(self):
         self.mazes = []
         self.media_name = ""
-        self.quiet_mode = False
+        self.quiet_mode = True
 
     def add_maze(self, row, col, id=0):
         """Add a maze to the manager. We give the maze an index of
@@ -36,7 +36,7 @@ class MazeManager(object):
             Maze: The newly created maze
         """
 
-        if id is not 0:
+        if id != 0:
             self.mazes.append(Maze(row, col, id))
         else:
             if len(self.mazes) < 1:
@@ -117,15 +117,23 @@ class MazeManager(object):
 
         """DEVNOTE: When adding a new solution method, call it from here.
             Also update the list of names in the documentation above"""
-        if method == "DepthFirstBacktracker":
-            solver = DepthFirstBacktracker(maze, neighbor_method, self.quiet_mode)
+        if method == "DepthFirstSearch":
+            solver = DepthFirst(maze, "brute-force", self.quiet_mode)
             maze.solution_path = solver.solve()
-        elif method == "BiDirectional":
-            solver = BiDirectional(maze, neighbor_method, self.quiet_mode)
+        elif method == "BreadthFirstSearch":
+            solver = BreadthFirst(maze, "brute-force", self.quiet_mode)
             maze.solution_path = solver.solve()
-        elif method == "BreadthFirst":
-            solver = BreadthFirst(maze, neighbor_method, self.quiet_mode)
+        elif method == "AStarSearch":
+            solver = AStar(maze, neighbor_method, self.quiet_mode)
             maze.solution_path = solver.solve()
+        elif method == "MDPSearch":
+            solver = MDP(maze, neighbor_method, self.quiet_mode)
+            maze.solution_path = solver.solve()
+        elif method == "PolicyIterationSearch":
+            solver = PolicyIteration(maze, neighbor_method, self.quiet_mode)
+            maze.solution_path = solver.solve()
+        else:
+            logging.debug("Search Algorithm Not Found")
 
     def show_maze(self, id, cell_size=1):
         """Just show the generation animation and maze"""
