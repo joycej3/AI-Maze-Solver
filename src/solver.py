@@ -48,7 +48,7 @@ class BreadthFirst(Solver):
         super().__init__(maze, neighbor_method, quiet_mode)
 
     def solve(self):
-        logging.debug("Class BreadthFirst solve called")
+        logging.debug("Class BreadthFirst solver called")
         curr = [self.maze.entry_coor]
         path = list()
         time_start = time.time()
@@ -79,9 +79,7 @@ class BreadthFirst(Solver):
             for cell in next:
                 curr.append(cell)
 
-        logging.debug("Class BreadthFirst leaving solve")
 
-        
 
 class DepthFirst(Solver):
 
@@ -93,41 +91,40 @@ class DepthFirst(Solver):
 
     # Function to solve the maze using depth-first search
     def solve(self):
-        
-        k_curr, l_curr = self.maze.entry_coor      # Where to start searching
-        self.maze.grid[k_curr][l_curr].visited = True     # Set initial cell to visited
-        visited_cells = list()                  # Stack of visited cells for backtracking
-        path = list()                           # To track path of solution and backtracking cells
-        if not self.quiet_mode:
-            print("\nSolving the maze with depth-first search...")
+        visited = list()
+        path = list()
 
         time_start = time.time()
+        x_coor, y_coor = self.maze.entry_coor
+        self.maze.grid[x_coor][y_coor].visited = True
+        
 
-        while (k_curr, l_curr) != self.maze.exit_coor:     # While the exit cell has not been encountered
-            neighbour_indices = self.maze.find_neighbours(k_curr, l_curr)    # Find neighbour indices
-            neighbour_indices = self.maze.validate_neighbours_solve(neighbour_indices, k_curr,
-                l_curr, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
+        while True:
 
-            if neighbour_indices is not None:   # If there are unvisited neighbour cells
-                visited_cells.append((k_curr, l_curr))              # Add current cell to stack
-                path.append(((k_curr, l_curr), False))  # Add coordinates to part of search path
-                k_next, l_next = random.choice(neighbour_indices)   # Choose random neighbour
-                self.maze.grid[k_next][l_next].visited = True                 # Move to that neighbour
-                k_curr = k_next
-                l_curr = l_next
+            # Found the exit
+            if(x_coor, y_coor) == self.maze.exit_coor:
+                path.append(((x_coor, y_coor), False))
+                self.maze.grid[x_coor][y_coor].visited = True
+                search_time = time.time() - time_start
+                print("Found path using DFS")
+                print("Time:               ", format(search_time))
+                print("Path Length:        ", format(len(path)))
+                return path
+            
+            neighbours = self.maze.find_neighbours(x_coor, y_coor) 
+            neighbours = self.maze.validate_neighbours_solve(neighbours, x_coor, y_coor, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
 
-            elif len(visited_cells) > 0:              # If there are no unvisited neighbour cells
-                path.append(((k_curr, l_curr), True))   # Add coordinates to part of search path
-                k_curr, l_curr = visited_cells.pop()    # Pop previous visited cell (backtracking)
 
-        path.append(((k_curr, l_curr), False))  # Append final location to path
-        if not self.quiet_mode:
-            print("Number of moves performed: {}".format(len(path)))
-            print("Execution time for algorithm: {:.4f}".format(time.time() - time_start))
+            if neighbours != None:
+                visited.append((x_coor, y_coor))
+                path.append(((x_coor, y_coor), False))
+                x_coor, y_coor = random.choice(neighbours)
+                self.maze.grid[x_coor][y_coor].visited = True
 
-        logging.debug('Class DepthFirstBacktracker leaving solve')
-        return path
-
+            else:
+                path.append(((x_coor, y_coor), True))
+                x_coor, y_coor = visited.pop()
+        
 
 class AStar(Solver):
 
