@@ -29,6 +29,7 @@ class Visualizer(object):
         self.lines = dict()
         self.squares = dict()
         self.media_filename = media_filename
+        self.__animation_speed = 500
 
     def set_media_filename(self, filename):
         """Sets the filename of the media
@@ -296,7 +297,7 @@ class Visualizer(object):
 
         logging.debug("Creating solution animation")
         anim = animation.FuncAnimation(fig, animate, frames=self.maze.solution_path.__len__(),
-                                       interval=100, blit=True, repeat=False)
+                                       interval=self.__animation_speed, blit=True, repeat=False)
         logging.debug("Finished creating solution animation")
 
         # Display the animation to the user

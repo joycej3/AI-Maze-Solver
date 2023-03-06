@@ -124,13 +124,13 @@ class MazeManager(object):
             solver = BreadthFirst(maze, "brute-force", self.quiet_mode)
             maze.solution_path = solver.solve()
         elif method == "AStarSearch":
-            solver = AStar(maze, neighbor_method, self.quiet_mode)
+            solver = AStar(maze, "brute-force", self.quiet_mode)
             maze.solution_path = solver.solve()
         elif method == "MDPSearch":
-            solver = MDP(maze, neighbor_method, self.quiet_mode)
+            solver = MDP(maze, "brute-force", self.quiet_mode)
             maze.solution_path = solver.solve()
         elif method == "PolicyIterationSearch":
-            solver = PolicyIteration(maze, neighbor_method, self.quiet_mode)
+            solver = PolicyIteration(maze, "brute-force", self.quiet_mode)
             maze.solution_path = solver.solve()
         else:
             logging.debug("Search Algorithm Not Found")

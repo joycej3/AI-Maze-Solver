@@ -16,9 +16,6 @@ if __name__ == "__main__":
     # Display the maze
     manager.show_maze(maze.id)
 
-    # Show how the maze was generated
-    manager.show_generation_animation(maze.id)
-
     # Show how the maze was solved
     manager.show_solution_animation(maze.id)
 
