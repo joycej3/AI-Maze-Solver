@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 import logging
 
+from src.maze import Maze
+
 # logging.basicConfig(level=logging.DEBUG)
 
 
@@ -130,6 +132,29 @@ class Visualizer(object):
         # Handle any saving
         if self.media_filename:
             fig.savefig("{}{}.png".format(self.media_filename, "_solution"), frameon=None)
+
+    def show_maze_value_solution(self):
+        fig = self.configure_plot()
+        self.plot_walls()
+
+        circle_num = 0
+        # list_of_backtrackers = [path_element[0] for path_element in self.maze.solution_path if path_element[1]]
+        # i=0
+        #TODO CHANGE TO RANGE OF COLOURS BETWEEN 1 AND 255
+        for j in range(self.maze.num_rows):
+            for i in range(self.maze.num_cols):
+                cell_color = (self.maze.value[j][i] +1) /2
+
+                self.ax.add_patch(plt.Circle((i+.5,j+.5), 0.2*self.cell_size, color = [0.0,cell_color, 0.0] ) )
+                # self.ax.text((i+.5,j+.5), 0.2*self.cell_size,color = "r")
+
+    
+                
+                
+                             
+        plt.show()
+
+
 
     def show_generation_animation(self):
         """Function that animates the process of generating the a maze where path is a list

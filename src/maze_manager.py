@@ -52,7 +52,7 @@ class MazeManager(object):
         already exists, the function will fail. To assign a new, unique id to
         the maze, set the overwrite flag to true.
 
-        Args:
+        Args: k
             maze: The maze that will be added to the manager
             override (bool): A flag that you can set to bypass checking the id
 
@@ -128,7 +128,7 @@ class MazeManager(object):
             maze.solution_path = solver.solve()
         elif method == "MDPSearch":
             solver = MDP(maze, "brute-force", self.quiet_mode)
-            maze.solution_path = solver.solve()
+            maze.value, maze.policy = solver.solve()
         elif method == "PolicyIterationSearch":
             solver = PolicyIteration(maze, "brute-force", self.quiet_mode)
             maze.solution_path = solver.solve()
@@ -147,6 +147,10 @@ class MazeManager(object):
     def show_solution(self, id, cell_size=1):
         vis = Visualizer(self.get_maze(id), cell_size, self.media_name)
         vis.show_maze_solution()
+
+    def show_value_solution(self, id, cell_size=1):
+        vis = Visualizer(self.get_maze(id), cell_size, self.media_name)
+        vis.show_maze_value_solution()
 
     def show_solution_animation(self, id, cell_size =1):
         """

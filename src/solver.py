@@ -2,7 +2,11 @@ import heapq
 import time
 import random
 import logging
+import turtle
+
+from matplotlib import pyplot as plt
 from src.maze import Maze
+import numpy as np
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -37,8 +41,6 @@ class Solver(object):
     def get_path(self):
         logging.debug('Class Solver get_path called')
         return self.path
-
-
 
 class BreadthFirst(Solver):
 
@@ -123,7 +125,6 @@ class DepthFirst(Solver):
             else:
                 path.append(((x_coor, y_coor), True))
                 x_coor, y_coor = visited.pop()
-        
         
 class AStar(Solver):
 
@@ -214,7 +215,8 @@ class AStar(Solver):
         return None
 
 class MDP(Solver):
-
+  
+    
     def __init__(self, maze, quiet_mode=False,  neighbor_method = "brute-force"):
         logging.debug('Class MDP ctor called')
 
@@ -222,61 +224,100 @@ class MDP(Solver):
         self.name = "MDP Search"
 
     # Function to solve the maze using depth-first search
-    def solve_maze_dfs(self):
-        logging.debug("MDP Search called")
-        start_coor_k, start_coor_l = self.maze.entry_coor
-
-        stack = [(start, [])]
-        while stack:
-            cell, path = stack.pop()
-            row, col = cell
-            if cell == end:
-                return path + [cell]
-            if maze[row][col] != " ":
-                continue
-            maze[row][col] = "."
-            neighbors = get_neighbors(cell)
-            random.shuffle(neighbors)
-            for neighbor in neighbors:
-                stack.append((neighbor, path + [cell]))
-        return None
-
     
     def solve(self):
-        logging.debug("Class DepthFirstBacktracker solve called")
-        k_curr, l_curr = self.maze.entry_coor      # Where to start searching
-        self.maze.grid[k_curr][l_curr].visited = True     # Set initial cell to visited
-        visited_cells = list()                  # Stack of visited cells for backtracking
-        path = list()                           # To track path of solution and backtracking cells
+        logging.debug("Class MDP solve called")
         if not self.quiet_mode:
             print("\nSolving the maze with depth-first search...")
 
+
+        start_coor = (self.maze.entry_coor)
+        exit_coor = (self.maze.exit_coor)
+        num_rows = self.maze.num_rows
+        num_cols = self.maze.num_cols
+    	
+        max_iteration = 200
+        threshold = 1e-5
+
+        discount = .9
+        reward_step = 0
+        final_reward = 1
+        noise = 0.25
+  
         time_start = time.time()
 
-        while (k_curr, l_curr) != self.maze.exit_coor:     # While the exit cell has not been encountered
-            neighbour_indices = self.maze.find_neighbours(k_curr, l_curr)    # Find neighbour indices
-            neighbour_indices = self.maze.validate_neighbours_solve(neighbour_indices, k_curr,
-                l_curr, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
+ # Perform value iteration until convergence
+        V = np.zeros((num_rows, num_cols))
+        V[exit_coor] = final_reward
 
-            if neighbour_indices is not None:   # If there are unvisited neighbour cells
-                visited_cells.append((k_curr, l_curr))              # Add current cell to stack
-                path.append(((k_curr, l_curr), False))  # Add coordinates to part of search path
-                k_next, l_next = random.choice(neighbour_indices)   # Choose random neighbour
-                self.maze.grid[k_next][l_next].visited = True                 # Move to that neighbour
-                k_curr = k_next
-                l_curr = l_next
+        delta = 0.0
+        iteration = 0
 
-            elif len(visited_cells) > 0:              # If there are no unvisited neighbour cells
-                path.append(((k_curr, l_curr), True))   # Add coordinates to part of search path
-                k_curr, l_curr = visited_cells.pop()    # Pop previous visited cell (backtracking)
+        while iteration < max_iteration:
+            delta = 0.0
+            for i in range(num_cols): #maze_State[0]
+                for j in range(num_rows):  #maze_State[1]]
+                    state = (i, j)
+                    if state != exit_coor:
+                        v = V[state]
+                        q = []
+                        neighbours = self.maze.find_neighbours(i, j) 
+                        neighbours = self.maze.validate_neighbours_solve(neighbours, i, j, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
 
-        path.append(((k_curr, l_curr), False))  # Append final location to path
-        if not self.quiet_mode:
-            print("Number of moves performed: {}".format(len(path)))
-            print("Execution time for algorithm: {:.4f}".format(time.time() - time_start))
+                        for neighbour in neighbours:                          
+                            q.append(reward_step + discount * V[neighbour])
 
-        logging.debug('Class DepthFirstBacktracker leaving solve')
-        return path
+                        V[state] = max(q)
+                        delta = max(delta, abs(v - V[state]))
+            
+            if delta < threshold:
+                print("converged")
+                break
+            
+            iteration = iteration + 1
+        print("iterations:  ", iteration)
+
+
+        search_time = time.time() - time_start
+        print("Time:               ", format(search_time))
+        # Find the optimal policy
+        policy = np.zeros((num_cols,num_rows), dtype=tuple)
+        
+        for i in range(num_cols):
+            for j in range(num_rows):
+                if True:
+                # (i, j) != exit_coor:
+                # if grid[i][j] != '#':
+                    # Dictionary comprehension to get value associated with each action
+                    neighbours = self.maze.find_neighbours(i, j) 
+                    neighbours = self.maze.validate_neighbours_solve(neighbours, i, j, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
+                    # for neighbour in neighbours:
+                   
+                    action_values = {n: V[n] for n in neighbours}
+
+                    policy[i][j] = max(action_values, key=action_values.get)
+                
+        
+
+        print("Value function:")
+        flipped_v = np.flip(V, axis=0)
+        formatted_v = np.array2string(flipped_v, precision=3, separator=',', suppress_small=True)
+
+        # Print the formatted array
+        print(formatted_v)
+        # print(V)
+
+        print("Optimal policy:")
+        flipped_policy = np.flip(policy, axis=0)
+        print(flipped_policy)
+
+        return V, policy
+        
+                
+
+       
+        # # logging.debug('Class MDP leaving solve')
+        # return path
 
 
 class PolicyIteration(Solver):
@@ -288,25 +329,6 @@ class PolicyIteration(Solver):
         self.name = "Depth First Search"
 
     # Function to solve the maze using depth-first search
-    def solve_maze_dfs(self):
-        logging.debug("Depth First Search called")
-        start_coor_k, start_coor_l = self.maze.entry_coor
-
-        stack = [(start, [])]
-        while stack:
-            cell, path = stack.pop()
-            row, col = cell
-            if cell == end:
-                return path + [cell]
-            if maze[row][col] != " ":
-                continue
-            maze[row][col] = "."
-            neighbors = get_neighbors(cell)
-            random.shuffle(neighbors)
-            for neighbor in neighbors:
-                stack.append((neighbor, path + [cell]))
-        return None
-
     
     def solve(self):
         logging.debug("Class DepthFirstBacktracker solve called")

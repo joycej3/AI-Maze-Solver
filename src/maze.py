@@ -43,6 +43,8 @@ class Maze(object):
         self.initial_grid = self.generate_grid()
         self.grid = self.initial_grid
         self.generate_maze(algorithm, (0, 0))
+        self.value = None
+        self.policy = None
 
     def generate_grid(self):
         """Function that creates a 2D grid of Cell objects. This can be thought of as a
