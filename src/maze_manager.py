@@ -131,7 +131,7 @@ class MazeManager(object):
             maze.value, maze.policy = solver.solve()
         elif method == "PolicyIterationSearch":
             solver = PolicyIteration(maze, "brute-force", self.quiet_mode)
-            maze.solution_path = solver.solve()
+            maze.value, maze.policy = solver.solve()
         else:
             logging.debug("Search Algorithm Not Found")
 

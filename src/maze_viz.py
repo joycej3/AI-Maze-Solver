@@ -136,10 +136,10 @@ class Visualizer(object):
     def show_maze_value_solution(self):
         fig = self.configure_plot()
         self.plot_walls()
-        #TODO CHANGE TO RANGE OF COLOURS BETWEEN 1 AND 255
+        
         for j in range(self.maze.num_cols):
             for i in range(self.maze.num_rows):
-                cell_color = (self.maze.value[i][j] +1) /2
+                cell_color = (self.maze.value[i][j] ) 
 
                 self.ax.add_patch(plt.Circle((j+.5,i+.5), 0.2*self.cell_size, color = [0.0,cell_color, 0.0] ) )
         plt.show()
@@ -147,8 +147,7 @@ class Visualizer(object):
     def show_maze_policy_solution(self):
         fig = self.configure_plot()
         self.plot_walls()
-        print("")
-        print(self.maze.policy)
+
 
         for j in range(self.maze.num_cols):
             for i in range(self.maze.num_rows):
