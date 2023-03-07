@@ -136,25 +136,58 @@ class Visualizer(object):
     def show_maze_value_solution(self):
         fig = self.configure_plot()
         self.plot_walls()
-
-        circle_num = 0
-        # list_of_backtrackers = [path_element[0] for path_element in self.maze.solution_path if path_element[1]]
-        # i=0
         #TODO CHANGE TO RANGE OF COLOURS BETWEEN 1 AND 255
-        for j in range(self.maze.num_rows):
-            for i in range(self.maze.num_cols):
-                cell_color = (self.maze.value[j][i] +1) /2
+        for j in range(self.maze.num_cols):
+            for i in range(self.maze.num_rows):
+                cell_color = (self.maze.value[i][j] +1) /2
 
-                self.ax.add_patch(plt.Circle((i+.5,j+.5), 0.2*self.cell_size, color = [0.0,cell_color, 0.0] ) )
-                # self.ax.text((i+.5,j+.5), 0.2*self.cell_size,color = "r")
-
-    
-                
-                
-                             
+                self.ax.add_patch(plt.Circle((j+.5,i+.5), 0.2*self.cell_size, color = [0.0,cell_color, 0.0] ) )
         plt.show()
 
+    def show_maze_policy_solution(self):
+        fig = self.configure_plot()
+        self.plot_walls()
+        print("")
+        print(self.maze.policy)
 
+        for j in range(self.maze.num_cols):
+            for i in range(self.maze.num_rows):
+               
+                match self.maze.policy[i][j]:
+                    case 0: 
+                        # up
+                        x =  i +.25
+                        y = j +.5
+                        dx = 0.5
+                        dy = 0.0
+                    case 1: 
+                        # down
+                        x =  i +.75
+                        y =  j + 0.5
+                        dx = -0.5
+                        dy = 0.0
+                    case 2: 
+                        # left
+                        x =  i +.5
+                        y =  j + 0.75
+                        dx = 0.0
+                        dy = -0.5
+                    case 3: 
+                        # right
+                        x =  i +.5
+                        y =  j + 0.25
+                        dx = 0.0
+                        dy = 0.5
+                    
+                if (i, j) == self.maze.exit_coor:
+                    x = i + 0.5
+                    y = j + 0.5
+                    dx = 0
+                    dy = 0
+
+                self.ax.add_patch(plt.arrow(y, x,  dy, dx, color = "red", width = 0.05, length_includes_head = True))
+                                 
+        plt.show()
 
     def show_generation_animation(self):
         """Function that animates the process of generating the a maze where path is a list

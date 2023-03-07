@@ -152,6 +152,10 @@ class MazeManager(object):
         vis = Visualizer(self.get_maze(id), cell_size, self.media_name)
         vis.show_maze_value_solution()
 
+    def show_policy_solution(self, id, cell_size=1):
+        vis = Visualizer(self.get_maze(id), cell_size, self.media_name)
+        vis.show_maze_policy_solution()
+
     def show_solution_animation(self, id, cell_size =1):
         """
         Shows the animation of the path that the solver took.

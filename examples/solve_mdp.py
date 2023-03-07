@@ -16,8 +16,7 @@ if __name__ == "__main__":
     # Display the maze
     manager.show_maze(maze.id)
 
-    # Show how the maze was solved
-    # manager.show_solution_animation(maze.id)
-
     # # Display the maze with the solution overlaid
     manager.show_value_solution(maze.id)
+
+    manager.show_policy_solution(maze.id)

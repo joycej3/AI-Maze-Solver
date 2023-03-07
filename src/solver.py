@@ -1,4 +1,5 @@
 import heapq
+import string
 import time
 import random
 import logging
@@ -281,8 +282,8 @@ class MDP(Solver):
         search_time = time.time() - time_start
         print("Time:               ", format(search_time))
         # Find the optimal policy
-        policy = np.zeros((num_cols,num_rows), dtype=tuple)
-        
+        policy = np.zeros((num_cols,num_rows), dtype=int)
+
         for i in range(num_cols):
             for j in range(num_rows):
                 if True:
@@ -295,7 +296,25 @@ class MDP(Solver):
                    
                     action_values = {n: V[n] for n in neighbours}
 
-                    policy[i][j] = max(action_values, key=action_values.get)
+                    
+                    next_cell = max(action_values, key=action_values.get)
+                    diff_cell = ((next_cell[0] - i), ( next_cell[1] - j))
+
+                    match diff_cell:
+                        case (1, 0):
+                            policy[i][j] = 0 # "up"
+                        case (-1, 0):
+                            policy[i][j] = 1 #"down"
+                        case (0, -1):
+                            policy[i][j] = 2 #"left"
+                        case (0, 1):
+                            policy[i][j] = 3 #"right"
+                        
+                        
+
+                    
+                    # policy[i][j] = max(action_values, key=action_values.get)
+                    
                 
         
 
