@@ -12,7 +12,7 @@ import numpy as np
 # logging.basicConfig(level=logging.DEBUG)
 max_iteration = 200
 # threshold = 1e-8
-threshold = 1e-3
+threshold = 1e-5
 discount = .99
 reward_step = 0.0
 final_reward = 1
@@ -157,6 +157,16 @@ class AStar(Solver):
 
         super().__init__(maze, neighbor_method, quiet_mode)
         self.name = "A* Search"
+    
+    def backtrace(parent, start, end):
+        l = list()
+        path = [end]
+        while path[-1] != start:
+            # print(path[-1])
+            path.append(parent[path[-1]])
+            l.append((path[-1], False))            
+
+        return l
 
     
     def heuristic(cell_a, cell_b):    
@@ -173,12 +183,11 @@ class AStar(Solver):
         exit_coor = (exit_x_coor, exit_y_coor)
 
         path = list()
+        parent_node = {}
 
         open_set = []
         visited = set()
         heapq.heappush(open_set, (AStar.heuristic(start_coor, exit_coor), start_coor, 0, None))
- 
-
         time_start = time.time()
 
         while open_set:
@@ -192,6 +201,8 @@ class AStar(Solver):
             if current_pos == exit_coor:
                 # path.append(((x_coor, y_coor), False))
                 # self.maze.grid[x_coor][y_coor].visited = True
+                path.append(((current_pos[0], current_pos[1]), False))
+                path.extend(AStar.backtrace(parent_node ,self.maze.entry_coor, self.maze.exit_coor  ))
                 search_time = time.time() - time_start
                 print("Found path using A*")
                 print("Time:               ", format(search_time))
@@ -214,7 +225,7 @@ class AStar(Solver):
                     continue
 
                 visited.add(current_pos)
-
+                parent_node[neighbor] =current_pos
                 new_g_score = g_score + 1
                 f_score = new_g_score + AStar.heuristic(neighbor, exit_coor)
 
