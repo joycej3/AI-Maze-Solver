@@ -57,10 +57,22 @@ class BreadthFirst(Solver):
         self.name = "Breadth First Recursive"
         super().__init__(maze, neighbor_method, quiet_mode)
 
+    def backtrace(parent, start, end):
+        l = list()
+        path = [end]
+        while path[-1] != start:
+            # print(path[-1])
+            path.append(parent[path[-1]])
+            l.append((path[-1], False))            
+
+        # print(l)
+        return l
+
     def solve(self):
         logging.debug("Class BreadthFirst solver called")
         curr = [self.maze.entry_coor]
         path = list()
+        parent = {}
         time_start = time.time()
         while True:
             next = list()
@@ -72,10 +84,15 @@ class BreadthFirst(Solver):
 
                 # Found the exit
                 if(x_coor, y_coor) == self.maze.exit_coor:
+                    path.append(((x_coor, y_coor), False))
+                    path.extend(BreadthFirst.backtrace(parent ,self.maze.entry_coor, self.maze.exit_coor  ))
+                    
+                    
                     search_time = time.time() - time_start
                     print("Found path using BFS")
                     print("Time:               ", format(search_time))
                     print("Path Length:        ", format(len(path)))
+                    
                     return path
                 
                 # Didn't find the exit
@@ -85,6 +102,7 @@ class BreadthFirst(Solver):
                 if neighbours != None:
                     for neighbour in neighbours:
                         next.append(neighbour)
+                        parent[neighbour] = (x_coor, y_coor)
 
             for cell in next:
                 curr.append(cell)

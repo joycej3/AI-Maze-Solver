@@ -31,7 +31,7 @@ class Visualizer(object):
         self.lines = dict()
         self.squares = dict()
         self.media_filename = media_filename
-        self.__animation_speed = 500
+        self.__animation_speed = 10
 
     def set_media_filename(self, filename):
         """Sets the filename of the media
@@ -328,11 +328,15 @@ class Visualizer(object):
 
         def animate_squares(frame):
             """Function to animate the solved path of the algorithm."""
+            
             if frame > 0:
                 if self.maze.solution_path[frame - 1][1]:  # Color backtracking
                     self.squares["{},{}".format(self.maze.solution_path[frame - 1][0][0],
                                            self.maze.solution_path[frame - 1][0][1])].set_facecolor("orange")
-
+                else:
+                    self.squares["{},{}".format(self.maze.solution_path[frame - 1][0][0],
+                                           self.maze.solution_path[frame - 1][0][1])].set_facecolor("green")
+                
                 self.squares["{},{}".format(self.maze.solution_path[frame - 1][0][0],
                                        self.maze.solution_path[frame - 1][0][1])].set_visible(True)
                 self.squares["{},{}".format(self.maze.solution_path[frame][0][0],
