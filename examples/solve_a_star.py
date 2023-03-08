@@ -19,5 +19,3 @@ if __name__ == "__main__":
     # Show how the maze was solved
     manager.show_solution_animation(maze.id)
 
-    # Display the maze with the solution overlaid
-    manager.show_solution(maze.id)

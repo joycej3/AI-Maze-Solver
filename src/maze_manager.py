@@ -20,7 +20,7 @@ class MazeManager(object):
         self.media_name = ""
         self.quiet_mode = True
 
-    def add_maze(self, row, col, id=0):
+    def add_maze(self, row, col, idn=0):
         """Add a maze to the manager. We give the maze an index of
         the total number of mazes in the manager. As long as we don't
         add functionality to delete mazes from the manager, the ids will
@@ -37,7 +37,7 @@ class MazeManager(object):
         """
 
         if id != 0:
-            self.mazes.append(Maze(row, col, id))
+            self.mazes.append(Maze(row, col, idn))
         else:
             if len(self.mazes) < 1:
                 self.mazes.append(Maze(row, col, 0))
@@ -73,7 +73,7 @@ class MazeManager(object):
         self.mazes.append(maze)
         return maze
 
-    def get_maze(self, id):
+    def get_maze(self, idn):
         """Get a maze by its id.
 
             Args:
@@ -85,7 +85,7 @@ class MazeManager(object):
         """
 
         for maze in self.mazes:
-            if maze.id == id:
+            if maze.id == idn:
                 return maze
         print("Unable to locate maze")
         return None

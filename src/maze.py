@@ -23,7 +23,7 @@ class Maze(object):
         grid (list): A copy of initial_grid (possible this is un-needed)
         """
 
-    def __init__(self, num_rows, num_cols, id=0, algorithm = "dfs_backtrack"):
+    def __init__(self, num_rows, num_cols, id_n=0, algorithm = "dfs_backtrack"):
         """Creates a gird of Cell objects that are neighbors to each other.
 
             Args:
@@ -34,7 +34,7 @@ class Maze(object):
         """
         self.num_cols = num_cols
         self.num_rows = num_rows
-        self.id = id
+        self.id = id_n
         self.grid_size = num_rows*num_cols
         self.entry_coor = self._pick_random_entry_exit(None)
         self.exit_coor = self._pick_random_entry_exit(self.entry_coor)

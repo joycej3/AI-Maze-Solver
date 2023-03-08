@@ -65,7 +65,6 @@ class BreadthFirst(Solver):
             path.append(parent[path[-1]])
             l.append((path[-1], False))            
 
-        # print(l)
         return l
 
     def solve(self):
