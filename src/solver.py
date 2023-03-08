@@ -11,8 +11,11 @@ import numpy as np
 
 # logging.basicConfig(level=logging.DEBUG)
 max_iteration = 200
-threshold = 1e-8
-discount = .9
+# threshold = 1e-8
+threshold = 1e-3
+discount = .99
+reward_step = 0.0
+final_reward = 1
 
 
 class Solver(object):
@@ -237,10 +240,6 @@ class MDP(Solver):
         num_rows = self.maze.num_rows
         num_cols = self.maze.num_cols
     	
-        
-        reward_step = 0
-        final_reward = 1
-        
   
         time_start = time.time()
 
@@ -316,78 +315,106 @@ class MDP(Solver):
 class PolicyIteration(Solver):
 
     def __init__(self, maze, quiet_mode=False,  neighbor_method = "brute-force"):
-        logging.debug('Class MDP ctor called')
+        logging.debug('Class MDP  policy iteration ctor called')
 
         super().__init__(maze, neighbor_method, quiet_mode)
-        self.name = "MDP Search"
+        self.name = "MDP policy Search"
+        
 
-    
-    def solve(self):
-        logging.debug("Class MDP solve called")
-        if not self.quiet_mode:
-            print("\nSolving the maze with MDP Value search...")
-
-        exit_coor = (self.maze.exit_coor)
+    def policy_eval(self, policy):
         num_rows = self.maze.num_rows
         num_cols = self.maze.num_cols
+        V = np.zeros((num_rows, num_cols))
+        V[self.maze.exit_coor] = final_reward
 
-        reward_step = 0
-        final_reward = 1
+        iterations = 0
+        while iterations < max_iteration:
+            
+            delta = 0.0
+            for j in range(num_cols): 
+                for i in range(num_rows): 
+                    state = (i,j)
+                    if (i, j) == self.maze.exit_coor:
+                        continue
+                    v = V[state]
+
+                    next_i = i
+                    next_j = j
+                    match policy[i][j]:
+                        case 0: 
+                            # (1, 0): up
+                           next_i = min(i + 1, num_rows - 1)
+                        case 1: # (-1, 0): down
+                            next_i = max(i - 1, 0)
+                        case 2: # (0, -1):
+                           next_j = max(j - 1 , 0)#"left"
+                        case 3: #(0, 1):
+                           next_j = min(j + 1, num_cols - 1) # right                 
+                    
+                    neighbours = self.maze.find_neighbours(i, j) 
+                    neighbours = self.maze.validate_neighbours_solve(neighbours, i, j, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
+                    if (next_i, next_j) not in neighbours:
+                        next_i = i
+                        next_j = j
+
+                    V[state] = reward_step + discount * V[(next_i, next_j)]
+                    
+                    delta = max(delta, abs(v - V[state]))
+            iterations += 1
+            if delta < threshold:
+                break
+        
+        return (V)
+
+
+    def solve(self):
+        logging.debug("Class MDP policy solve called")
+        if not self.quiet_mode:
+            print("\nSolving the maze with MDP policy search...")
+
+        num_rows = self.maze.num_rows
+        num_cols = self.maze.num_cols
         
         time_start = time.time()
 
-        V = np.zeros((num_rows, num_cols))
-        V[exit_coor] = final_reward
-
-        delta = 0.0
-        iteration = 0
-
-        while iteration < max_iteration:
-            delta = 0.0
-            for i in range(num_rows): #maze_State[0]
-                for j in range(num_cols):  #maze_State[1]]
-                    state = (i, j)
-                    if state != exit_coor:
-                        v = V[state]
-                        q = []
-                        neighbours = self.maze.find_neighbours(i, j) 
-                        neighbours = self.maze.validate_neighbours_solve(neighbours, i, j, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
-
-                        for neighbour in neighbours:                          
-                            q.append(reward_step + discount * V[neighbour])
-
-                        V[state] = max(q)
-                        delta = max(delta, abs(v - V[state]))
-            
-            if delta < threshold:
-                print("converged")
-                break
-            
-            iteration = iteration + 1
-        print("iterations:  ", iteration)
-        
-        # Find the optimal policy
         policy = np.zeros((num_rows,num_cols), dtype=int)
-
-        for i in range(num_rows):
-            for j in range(num_cols):
-                if True:
+        iteration = 0
+        
+        while iteration < max_iteration :
+            V = PolicyIteration.policy_eval(self, policy)
+            stable = True
+            
+            for j in range(num_cols): #maze_State[0]
+                for i in range(num_rows):  #maze_State[1]]
+                    
+                    state = (i, j)
+                
                     neighbours = self.maze.find_neighbours(i, j) 
                     neighbours = self.maze.validate_neighbours_solve(neighbours, i, j, self.maze.exit_coor[0], self.maze.exit_coor[1], self.neighbor_method)
-                   
+                    
                     action_values = {n: V[n] for n in neighbours}
                     next_cell = max(action_values, key=action_values.get)
                     diff_cell = ((next_cell[0] - i), ( next_cell[1] - j))
 
                     match diff_cell:
                         case (1, 0):
-                            policy[i][j] = 0 # "up"
+                            best_action = 0 # "up"
                         case (-1, 0):
-                            policy[i][j] = 1 #"down"
+                            best_action = 1 #"down"
                         case (0, -1):
-                            policy[i][j] = 2 #"left"
+                            best_action = 2 #"left"
                         case (0, 1):
-                            policy[i][j] = 3 #"right"
+                            best_action = 3 #"right"
+    
+                    if best_action != policy[state]:
+                        stable = False
+                        policy[state] = best_action              
+
+            if stable:
+                break
+            
+            iteration = iteration + 1
+        print("iterations:  ", iteration)
 
         search_time = time.time() - time_start
         print("Time:               ", format(search_time))
@@ -395,12 +422,12 @@ class PolicyIteration(Solver):
         print("Value function:")
         flipped_v = np.flip(V, axis=0)
         formatted_v = np.array2string(flipped_v, precision=3, separator=',', suppress_small=True)
-
-        # Print the formatted array
         print(formatted_v)
+
 
         print("Optimal policy:")
         flipped_policy = np.flip(policy, axis=0)
         print(flipped_policy)
+
 
         return V, policy
